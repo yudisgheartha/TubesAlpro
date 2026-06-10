@@ -401,6 +401,4 @@ func editData(jumMurid *int, bulan *int, kas *tabData) {
 
 }
 
-/*
-2. inputan ga valid
-*/
+
