@@ -21,6 +21,7 @@ func main() {
 
 func menu(jumMurid *int, bulan *int, kas *tabData) {
 	var pilihan int
+	var kasPerBulan int
 	for {
 		fmt.Println()
 		fmt.Println("========== MENU UTAMA ==========")
@@ -29,16 +30,16 @@ func menu(jumMurid *int, bulan *int, kas *tabData) {
 		fmt.Println("3. Cek Status by NIM")
 		fmt.Println("4. Cek Detail by NIM")
 		fmt.Println("5. Urutkan Tampilan")
-		fmt.Println("6. Reset Data Kas")
+		fmt.Println("6. Edit Data Kas")
 		fmt.Println("0. Exit")
 		fmt.Println("================================")
 		fmt.Print("Pilihan : ")
 		fmt.Scan(&pilihan)
-		flushBuffer()
+		//flushBuffer()
 
 		switch pilihan {
 		case 1:
-			inputUangKas(jumMurid, bulan, kas)
+			inputUangKas(&kasPerBulan, jumMurid, bulan, kas)
 		case 2:
 			tampilkanSemua(jumMurid, bulan, kas)
 		case 3:
@@ -48,7 +49,8 @@ func menu(jumMurid *int, bulan *int, kas *tabData) {
 		case 5:
 			urutkanTampilan(jumMurid, bulan, kas)
 		case 6:
-			resetData(jumMurid, bulan, kas)
+			editData(jumMurid, bulan, kas)
+			hitungStatus(kasPerBulan, jumMurid, bulan, kas)
 		case 0:
 			fmt.Println("Terima kasih. Program selesai.")
 			return
@@ -58,8 +60,8 @@ func menu(jumMurid *int, bulan *int, kas *tabData) {
 	}
 }
 
-func inputUangKas(jumMurid *int, bulan *int, kas *tabData) {
-	var kasPerBulan int
+func inputUangKas(kasPerBulan, jumMurid *int, bulan *int, kas *tabData) {
+	//var kasPerBulan int
 
 	fmt.Println()
 	fmt.Println("======== INPUT UANG KAS ========")
@@ -68,7 +70,7 @@ func inputUangKas(jumMurid *int, bulan *int, kas *tabData) {
 	fmt.Print("Jumlah Bulan : ")
 	fmt.Scan(bulan)
 	fmt.Print("Kas per Bulan (Rp) : ")
-	fmt.Scan(&kasPerBulan)
+	fmt.Scan(kasPerBulan)
 
 	fmt.Println()
 	fmt.Println("Masukkan data (NIM - NAMA - JUMLAH_BAYAR) :")
@@ -78,16 +80,16 @@ func inputUangKas(jumMurid *int, bulan *int, kas *tabData) {
 		fmt.Scan(&kas[i].nim, &kas[i].nama, &kas[i].jumlahBayar)
 	}
 
-	hitungStatus(kasPerBulan, jumMurid, bulan, kas)
+	hitungStatus(*kasPerBulan, jumMurid, bulan, kas)
 	fmt.Println()
 	fmt.Println("Data berhasil diinput!")
-	flushBuffer()
+	//flushBuffer()
 }
 
-func flushBuffer() {
-	var dummy string
-	fmt.Scanln(&dummy)
-}
+// func flushBuffer() {
+// 	var dummy string
+// 	fmt.Scanln(&dummy)
+// }
 
 func hitungStatus(kasPerBulan int, jumMurid *int, bulan *int, kas *tabData) {
 	total := *bulan * kasPerBulan
@@ -106,9 +108,11 @@ func hitungStatus(kasPerBulan int, jumMurid *int, bulan *int, kas *tabData) {
 }
 
 func tampilkanSemua(jumMurid *int, bulan *int, kas *tabData) {
+
 	if *jumMurid == 0 {
+		var kasPerBulan int
 		fmt.Println("\nBelum ada data. Masukkan data terlebih dahulu.")
-		inputUangKas(jumMurid, bulan, kas)
+		inputUangKas(&kasPerBulan, jumMurid, bulan, kas)
 		tampilkanSemua(jumMurid, bulan, kas)
 		return
 	}
@@ -137,8 +141,9 @@ func tampilkanSemua(jumMurid *int, bulan *int, kas *tabData) {
 }
 
 func ringkasanData(jumMurid *int, kas *tabData) {
-	var totalLunas, totalBelumLunas, totalLebihBayar, totalKurangBayar int
+	var totalBayar, totalLunas, totalBelumLunas, totalLebihBayar, totalKurangBayar int
 	for i := 0; i < *jumMurid; i++ {
+		totalBayar += kas[i].jumlahBayar
 		if kas[i].status == "LUNAS" {
 			totalLunas++
 			totalLebihBayar += kas[i].lebihBayar
@@ -153,6 +158,7 @@ func ringkasanData(jumMurid *int, kas *tabData) {
 	fmt.Printf("Belum Lunas   : %d murid\n", totalBelumLunas)
 	fmt.Printf("Total Lebih Bayar  : Rp %d\n", totalLebihBayar)
 	fmt.Printf("Total Kurang Bayar : Rp %d\n", totalKurangBayar)
+	fmt.Printf("Total Bayar : Rp %d\n", totalBayar)
 	fmt.Println("-------------------------")
 }
 
@@ -160,7 +166,8 @@ func cekLunas(jumMurid *int, kas *tabData) {
 	if *jumMurid == 0 {
 		fmt.Println("\nBelum ada data. Masukkan data terlebih dahulu.")
 		var bulan int
-		inputUangKas(jumMurid, &bulan, kas)
+		var kasPerBulan int
+		inputUangKas(&kasPerBulan, jumMurid, &bulan, kas)
 		cekLunas(jumMurid, kas)
 		return
 	}
@@ -186,7 +193,7 @@ func cekLunas(jumMurid *int, kas *tabData) {
 				fmt.Println(sep)
 				found = true
 			}
-		}
+		} //seq
 		if !found {
 			fmt.Println("NIM tidak ditemukan.")
 		}
@@ -197,7 +204,8 @@ func cekNim(jumMurid *int, kas *tabData) {
 	if *jumMurid == 0 {
 		fmt.Println("\nBelum ada data. Masukkan data terlebih dahulu.")
 		var bulan int
-		inputUangKas(jumMurid, &bulan, kas)
+		var kasPerBulan int
+		inputUangKas(&kasPerBulan, jumMurid, &bulan, kas)
 		cekNim(jumMurid, kas)
 		return
 	}
@@ -216,19 +224,18 @@ func cekNim(jumMurid *int, kas *tabData) {
 		right := *jumMurid - 1
 		foundIdx := -1
 
-		for left <= right {
+		for left <= right && foundIdx == -1 {
 			mid := left + (right-left)/2
 
 			if kas[mid].nim == target {
 				foundIdx = mid
-				break
 			} else if kas[mid].nim < target {
 				left = mid + 1
 			} else {
 				right = mid - 1
 			}
 		}
-
+		//output
 		if foundIdx != -1 {
 			sep := "+----------+---------------+-----------------+-------------+--------------+--------------+"
 			fmt.Println(sep)
@@ -246,14 +253,15 @@ func cekNim(jumMurid *int, kas *tabData) {
 			fmt.Println(sep)
 		} else {
 			fmt.Println("NIM tidak ditemukan.")
-		}
+		} //bin
 	}
 }
 
 func urutkanTampilan(jumMurid *int, bulan *int, kas *tabData) {
 	if *jumMurid == 0 {
 		fmt.Println("\nBelum ada data. Masukkan data terlebih dahulu.")
-		inputUangKas(jumMurid, bulan, kas)
+		var kasPerBulan int
+		inputUangKas(&kasPerBulan, jumMurid, bulan, kas)
 		urutkanTampilan(jumMurid, bulan, kas)
 		return
 	}
@@ -266,7 +274,7 @@ func urutkanTampilan(jumMurid *int, bulan *int, kas *tabData) {
 	fmt.Println("0. Batal")
 	fmt.Print("Pilihan : ")
 	fmt.Scan(&pilihan)
-	flushBuffer()
+	//flushBuffer()
 
 	switch pilihan {
 	case 1:
@@ -278,7 +286,7 @@ func urutkanTampilan(jumMurid *int, bulan *int, kas *tabData) {
 				j--
 			}
 			kas[j+1] = key
-		}
+		} //ins
 		fmt.Println("Data berhasil diurutkan by NIM.")
 		tampilkanSemua(jumMurid, bulan, kas)
 	case 2:
@@ -288,7 +296,7 @@ func urutkanTampilan(jumMurid *int, bulan *int, kas *tabData) {
 					kas[j], kas[j+1] = kas[j+1], kas[j]
 				}
 			}
-		}
+		} //selec
 		fmt.Println("Data berhasil diurutkan: Belum Lunas dahulu.")
 		tampilkanSemua(jumMurid, bulan, kas)
 	case 0:
@@ -298,21 +306,101 @@ func urutkanTampilan(jumMurid *int, bulan *int, kas *tabData) {
 	}
 }
 
-func resetData(jumMurid *int, bulan *int, kas *tabData) {
+func editData(jumMurid *int, bulan *int, kas *tabData) {
 	var konfirmasi string
+	var pilihan int
 	fmt.Println()
-	fmt.Println("======== RESET DATA KAS ========")
-	fmt.Println("PERINGATAN: Semua data akan dihapus!")
-	fmt.Print("Yakin reset? (y/n) : ")
-	fmt.Scan(&konfirmasi)
-	flushBuffer()
+	fmt.Println("======== EDIT DATA KAS ========")
+	fmt.Println("Pilihan : ")
+	fmt.Println("1. Reset Uang Kas")
+	fmt.Println("2. Tambahkan Data")
+	fmt.Println("3. Bayar Uang Kas")
+	fmt.Println("4. Hapus Data")
 
-	if konfirmasi == "y" || konfirmasi == "Y" {
-		*jumMurid = 0
-		*bulan = 0
-		*kas = tabData{}
-		fmt.Println("Data berhasil direset. Silakan input ulang.")
-	} else {
-		fmt.Println("Reset dibatalkan.")
+	//fmt.Println("0. Exit")
+	fmt.Print("Pilihan : ")
+	fmt.Scan(&pilihan)
+	switch pilihan {
+	case 1:
+		fmt.Println("======== RESET DATA KAS ========")
+		fmt.Println("PERINGATAN: Semua data akan dihapus!")
+		fmt.Print("Yakin reset? (y/n) : ")
+		fmt.Scan(&konfirmasi)
+
+		if konfirmasi == "y" || konfirmasi == "Y" {
+			*jumMurid = 0
+			*bulan = 0
+			*kas = tabData{}
+			fmt.Println("Data berhasil direset. Silakan input ulang.")
+		} else {
+			fmt.Println("Reset dibatalkan.")
+		}
+	case 2:
+		fmt.Println("======== TAMBAH DATA KAS ========")
+		fmt.Println("Input data murid baru")
+
+		fmt.Print("NIM : ")
+		fmt.Scan(&kas[*jumMurid].nim)
+
+		fmt.Print("Nama : ")
+		fmt.Scan(&kas[*jumMurid].nama)
+
+		fmt.Print("Jumlah Bayar : ")
+		fmt.Scan(&kas[*jumMurid].jumlahBayar)
+		*jumMurid++
+
+		fmt.Println("Data berhasil ditambahkan.")
+	case 3:
+		var target int
+		var jumBayar int
+		fmt.Println("======== BAYAR UANG KAS ========")
+		fmt.Print("Masukkan NIM: ")
+		fmt.Scan(&target)
+
+		for i := 0; i < *jumMurid; i++ {
+			if kas[i].nim == target {
+				fmt.Print("Jumlah Bayar Kas: ")
+				fmt.Scan(&jumBayar)
+				kas[i].jumlahBayar += jumBayar
+				fmt.Println("Data berhasil diubah.")
+			}
+		}
+
+		fmt.Println("NIM tidak ditemukan.")
+	case 4:
+		var target int
+		var baru tabData
+		fmt.Println("======== HAPUS DATA KAS ========")
+		fmt.Print("Masukkan NIM: ")
+		fmt.Scan(&target)
+
+		idx := -1
+
+		for i := 0; i < *jumMurid; i++ {
+			if kas[i].nim == target {
+				idx = i
+			}
+		}
+
+		if idx == -1 {
+			fmt.Println("NIM tidak ditemukan.")
+		}
+		j := 0
+		for i := 0; i < *jumMurid; i++ {
+			if i != idx {
+				baru[j] = kas[i]
+				j++
+			}
+		}
+
+		*kas = baru
+		*jumMurid--
+
+		fmt.Println("Data berhasil dihapus.")
 	}
+
 }
+
+/*
+2. inputan ga valid
+*/
